@@ -1,0 +1,152 @@
+library(caret)
+library(missRanger)
+library(data.table)
+library(plyr)
+library(ggplot2)
+library(glmnet)
+library(randomForest)
+library(forecast)
+library(xgboost)
+
+# Reading The Data set
+bigmart.train<- read.csv("C:/Users/Chetan Yewale/Downloads/Bigmart_train.csv",na.strings=c("","NA"))
+bigmart.test<- read.csv("C:/Users/Chetan Yewale/Downloads/Bigmart_test.csv",na.strings=c("","NA"))
+
+
+## Counting NA Values 
+sum(is.na(bigmart.train))
+sum(is.na(bigmart.test))
+
+## Imputation With Random Forest
+bigmart.train<- missRanger(bigmart.train)
+bigmart.test<- missRanger(bigmart.test)
+
+## Combining the data
+## As we dont have a column Item_Outlet_Sales, so we will create it First with NA Values
+bigmart.test$Item_Outlet_Sales<- NA
+
+bigmart<- rbind(bigmart.train,bigmart.test)
+
+View(bigmart)
+attach(bigmart)
+str(bigmart)
+sum(is.na(bigmart))
+
+#Let’s replace the zeroes.
+zero_index = which(bigmart$Item_Visibility == 0) 
+for(i in zero_index){
+  item = bigmart$Item_Identifier[i]  
+  bigmart$Item_Visibility[i] = mean(bigmart$Item_Visibility[bigmart$Item_Identifier == item], na.rm = T)
+}
+
+
+## plot
+plot(bigmart$Item_Weight,bigmart$Item_Outlet_Sales)
+plot(bigmart$Item_Fat_Content,bigmart$Item_Outlet_Sales)
+plot(bigmart$Item_Visibility,bigmart$Item_Outlet_Sales)
+plot(bigmart$Item_Type,bigmart$Item_Outlet_Sales)
+plot(bigmart$Item_MRP,bigmart$Item_Outlet_Sales)
+plot(bigmart$Outlet_Identifier,bigmart$Item_Outlet_Sales)
+plot(bigmart$Outlet_Establishment_Year,bigmart$Item_Outlet_Sales)
+plot(bigmart$Outlet_Size,bigmart$Item_Outlet_Sales)
+plot(bigmart$Outlet_Location_Type,bigmart$Item_Outlet_Sales)
+plot(bigmart$Outlet_Type,bigmart$Item_Outlet_Sales)
+
+###
+library(ggplot2)
+ggplot(data = bigmart,aes (x = Outlet_Establishment_Year),fill= Outlet_Establishment_Year)+
+  geom_bar(colour ="Blue",fill = "lightblue")+
+  ggtitle("Plot OF Outlet_Establishment")
+
+ggplot(data = bigmart,aes (x = Item_MRP))+
+  geom_histogram(colour ="Blue",fill = "lightblue")+
+  ggtitle("Plot OF Item_MRP")
+
+ggplot(bigmart,aes (x = Item_Visibility))+
+  geom_histogram(colour ="Blue",fill = "lightblue")+
+  ggtitle("Plot OF Item_Visibility")
+
+## Revalue 
+bigmart$Item_Fat_Content<- as.factor(revalue(bigmart$Item_Fat_Content,c("LF"= "Low Fat","low fat"= "Low Fat","reg"= "Regular")))
+str(bigmart$Item_Fat_Content)
+
+##
+bigmart$Outlet_Location_Type<- as.numeric(revalue(bigmart$Outlet_Location_Type,c("Tier 1"= 1,"Tier 2"= 2,"Tier 3" = 3)))
+
+##
+bigmart$Outlet_Size<- as.numeric(revalue(bigmart$Outlet_Size,c("Small"=0,"Medium"=1,"High"=2)))
+
+
+#One hot encoding for the categorical variable
+ohe <-dummyVars("~.", data = bigmart[,-c(1,5,8)], fullRank = T) 
+ohe_df<- data.table(predict(ohe, bigmart[,-c(1,5,8)])) 
+bigmart<- cbind(bigmart$Item_Identifier, ohe_df)
+str(bigmart)
+View(bigmart)
+
+### Splitting Train & Test
+train<- bigmart[1:8523,]
+test<- bigmart[8524:14204,]
+
+##################################### Model_Building ############################################ 
+## Linear Regression
+model_lm_bigmart<- lm(Item_Outlet_Sales~.,data = train)
+summary(model_lm_bigmart)
+## Multiple R-squared:  0.6433,	Adjusted R-squared:  0.5628
+accuracy(model_lm_bigmart)            ### Train RMSE = 1019.08
+pred_mod_lm<- as.numeric(predict(model_lm_bigmart,newdata = test))
+View(pred_mod_lm)
+plot(model_lm_bigmart)
+
+## RandomForest Model
+set.seed(1237) 
+my_control <- trainControl(method="cv", number=5) # 5-fold CV 
+tgrid <- expand.grid(
+  .mtry = c(3:10),
+  .splitrule = "variance",
+  .min.node.size = c(10,15,20)
+)
+
+model_rf_bigmart <- train(x = train[, -c(1,20)],
+               y = train$Item_Outlet_Sales,
+               method='ranger',
+               trControl= my_control,
+               tuneGrid = tgrid,
+               num.trees = 400,
+               importance = "permutation")
+
+model_rf_bigmart             
+#"mtry" "min.node.size"       "RMSE"      "R- Sqaured"       "MAE"
+#  7          20              1088.996      0.5929         767.1462
+
+plot(model_rf_bigmart)
+pred_rf<- predict(model_rf_bigmart,test)
+View(pred_rf)
+
+
+#### XGBoost Method
+param_list <- list(objective = "reg:linear", eta=0.01, gamma = 1,max_depth=5,  subsample=0.8,  colsample_bytree=1)
+xgb.train<- xgb.DMatrix(data = as.matrix(train[,-c(1,20)]), label= train$Item_Outlet_Sales) 
+xgb.test<-  xgb.DMatrix(data = as.matrix(test[,-c(1,20)]),label= test$Item_Outlet_Sales)
+
+model_xgb = xgb.cv(params<- param_list, data = xgb.train,nrounds = 1000,nfold = 5,print_every_n = 10,early_stopping_rounds = 30,maximize = F)
+#Stopping. Best iteration:
+#[390]	train-rmse:1002.820605+2.888876	test-rmse:1081.959936+7.340752
+
+model_xgb_bigmart<- xgb.train(data = xgb.train,params= param_list,nrounds = 390)
+pred_xgb<- predict(model_xgb_bigmart,newdata = xgb.test)
+#View(pred_xgb)
+
+
+###
+submission<- read.csv(file.choose())
+View(submission)
+submission$Item_Outlet_Sales<- predict(model_xgb_bigmart,newdata = xgb.test)
+
+## GGplot For Predicion
+ggplot(data = submission,aes (x = Item_Outlet_Sales))+
+  geom_histogram(colour ="Blue",fill ="lightblue")+
+  ggtitle("Plot OF Output_sale")
+
+
+write.csv(submission,file="Submission.csv",col.names = F,row.names = F)
