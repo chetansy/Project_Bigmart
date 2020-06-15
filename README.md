@@ -15,7 +15,7 @@ We have train (8523) and test (5681) data set, train data set has both input and
 We at our end, have the actual sales for the test dataset, against which your predictions will be evaluated. We will use the Root Mean Square Error value to judge your response.
 
 ## Strategy:--
-- [Define Goal]
+- [Define Goal](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#define-goals)
 - [Explore & Visualize data]
 - [Pre-Processing Data]
 - [Partitioning Data]
