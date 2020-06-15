@@ -16,12 +16,12 @@ We at our end, have the actual sales for the test dataset, against which your pr
 
 ## Strategy:--
 - [Define Goal](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#define-goals)
-- [Explore & Visualize data]
-- [Pre-Processing Data]
-- [Partitioning Data]
-- [Apply Prediction Models]
-- [Evaluate & Compare Models]
-- [Model Selection]
+- [Explore & Visualize data](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#explore--visualize-data)
+- [Pre-Processing Data](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#pre-processing-data)
+- [Partitioning Data](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#partitioning-data)
+- [Apply Prediction Models](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#apply-prediction-models)
+- [Evaluate & Compare Models](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#evaluate--compare-models)
+- [Model Selection](https://github.com/chetansy/Project_Bigmart/blob/master/README.md#model-selection)
 
 ### Define Goals
 ### Explore & Visualize data
