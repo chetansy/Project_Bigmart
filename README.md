@@ -54,9 +54,9 @@ They have the actual sales for the test dataset, against which your predictions 
 
 ### Apply Prediction Models:-
 - We Have Used 3 Regression Model
-1- Linear Regression Model
-2- Random Forest Ranger Regression Model
-3- XGBoost Regression Model
+- Linear Regression Model
+- Random Forest Ranger Regression Model
+- XGBoost Regression Model
 
 ### Evaluate & Compare Models:-
 - Prediction model performance will be evaluated on the basis of your prediction of the sales for the test data (test.csv), which contains similar data-points as train except for the sales to be predicted.
