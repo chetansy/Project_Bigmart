@@ -26,6 +26,18 @@ They have the actual sales for the test dataset, against which your predictions 
 - Using this model, BigMart will try to understand the properties of products and outlets which play a key role in increasing sales.
 
 ### Explore & Visualize data:- 
+- Item_type VS Outlet_Sales
+![Item_typ](https://user-images.githubusercontent.com/62282151/84678822-19009580-af4e-11ea-8631-9b0a0c8776bc.png)
+- Outlet_Size VS Item_Outlet_Sales
+![Outlet_size](https://user-images.githubusercontent.com/62282151/84679225-a7751700-af4e-11ea-80ea-c6c70d5c0134.PNG)
+- Outlet_Identifier VS Item_Outlet_Sales
+![Outlet_Identifier](https://user-images.githubusercontent.com/62282151/84679340-d12e3e00-af4e-11ea-8c93-9b9ba0d7dfb5.PNG)
+- Outlet_Location_Type VS Item_Outlet_Sales
+![Outlet_Location](https://user-images.githubusercontent.com/62282151/84679524-05a1fa00-af4f-11ea-968e-a285aef8d294.PNG)
+- Outlet_Establishment_Year VS Item_Outlet_Sales
+![Outlet_Year](https://user-images.githubusercontent.com/62282151/84679689-3d10a680-af4f-11ea-90d3-a366560c86d8.PNG)
+- 
+
 
 ### Pre-Processing Data:-
 - Train Data Set has 3873 Missing Values.
